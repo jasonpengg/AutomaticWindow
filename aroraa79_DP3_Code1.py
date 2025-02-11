@@ -6,7 +6,7 @@ import math
 from gpiozero import Motor
 import time
 
-motor=Motor(forward=#tbd, backward=#tbd) 
+motor=Motor(forward=#pinnumber, backward=#pinnumber) 
 
 #import LED 
 from gpiozero import LED
@@ -37,7 +37,8 @@ def force_close():
 
 def det_degrees():
     ##function which converts info from linear actuator to determine the number of degrees a certain time/distance equates to
-    ##potentially use MM5 code from lab? 
+    ##potentially use MM5 code from lab?
+    ##need to convert time -> distance -> degrees 
 
 def settings():
     if button_number=1:
