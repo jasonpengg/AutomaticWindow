@@ -3,7 +3,7 @@ class pi:
         self.green_led = green_led
         self.red_led = red_led
         self.yellow_led = yellow_led
-        self.raw_temperature = raw_temperature
+        self.raw_temperature = []
         self.avg_temperature = avg_temperature
 
     def set_green_led(self, green_status):
@@ -26,17 +26,20 @@ class pi:
     
     def get_yellow_led(self):
         return self.yellow_led
-    
-    def set_raw_temperature (self, raw_temperature):
-        self.raw_temperature = raw_temperature
-        return self.raw_temperature
-    
-    def get_raw_temperature (self):
-        return self.raw_temperature
 
-    def set_avg_temperature (self, avg_temperature):
-        self.avg_temperature = avg_temperature
+    def update_avg_temperature(self):
+        self.avg_temperature = (format(sum(self.raw_temperature)/len(self.raw_temperature), '.2f'))
         return self.avg_temperature
 
-    def get_avg_temperature (self):
+    def get_avg_temperature(self):
         return self.avg_temperature
+    
+    def get_raw_temperature(self):
+        return self.raw_temperature
+
+    def set_raw_temperature(self, current_temperature):
+        self.raw_temperature.insert(0, current_temperature)  # Inserts at the beginning
+        if len(self.raw_temperature) > 10:
+            self.raw_temperature
+        self.update_avg_temperature()
+        return self.raw_temperature
