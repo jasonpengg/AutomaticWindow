@@ -3,7 +3,7 @@ import requests
 def get_weather():
     api_key = '25c8075700176ffa23836cc6b6820d56'
     location = 'Hamilton'
-    temperature = 0
+    temperature = 22
     weather_description = 'sunny'
     return temperature ,weather_description
 '''
