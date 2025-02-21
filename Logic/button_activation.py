@@ -1,5 +1,6 @@
 import time
 from gpiozero import Button, LED
+from Logic.object_pi import *
 
 # Define LEDs
 red_led = LED(5)
@@ -19,20 +20,29 @@ def button_counter(button_press_count):
             button_press_count = 1
     return button_press_count
 
-def led_control(button_press_count):
+def led_control(button_press_count, pi_status):
     """Controls which LED is on based on the button press count."""
     if button_press_count == 1:
         red_led.on()
         green_led.off()
         yellow_led.off()
+        pi.set_red_led(pi_status, True)
+        pi.set_green_led(pi_status, False)
+        pi.set_yellow_led(pi_status, False)
     elif button_press_count == 2:
         red_led.off()
         green_led.on()
         yellow_led.off()
+        pi.set_red_led(pi_status, False)
+        pi.set_green_led(pi_status, True)
+        pi.set_yellow_led(pi_status, False)
     elif button_press_count == 3:
         red_led.off()
         green_led.off()
         yellow_led.on()
+        pi.set_red_led(pi_status, False)
+        pi.set_green_led(pi_status, False)
+        pi.set_yellow_led(pi_status, True)
 
 def main():
     button_press_count = 0
