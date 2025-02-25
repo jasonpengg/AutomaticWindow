@@ -1,6 +1,6 @@
 import time
 from gpiozero import Button, LED
-from Logic.object_pi import *
+from src.object_pi import *
 
 # Define LEDs
 red_led = LED(5)
@@ -9,14 +9,14 @@ yellow_led = LED(6)
 
 # Define button
 button = Button(23)
+text_button = Button(14)
 
 def button_counter(button_press_count):
     """Updates the button press count and loops back to 1 after 3 presses."""
     if button.is_pressed:
         print("button Pressed")
-        button_press_count += 1
-        time.sleep(0.5)  # Debounce to avoid counting multiple presses
-        if button_press_count > 3:  # Reset after the 3rd press
+        button_press_count += 1  
+        if button_press_count > 3:  
             button_press_count = 1
     return button_press_count
 
@@ -44,9 +44,6 @@ def led_control(button_press_count, pi_status):
         pi.set_green_led(pi_status, False)
         pi.set_yellow_led(pi_status, True)
 
-def main():
-    button_press_count = 0
-    while True:
-        button_press_count = button_counter(button_press_count)
-        led_control(button_press_count)
-        time.sleep(0.1)  # Short delay for responsiveness
+def text_input():
+    if text_button.is_pressed:
+        return True

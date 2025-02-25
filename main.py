@@ -1,4 +1,4 @@
-from Logic import *
+from src import *
 #Creating a graph which overtime shows the temperatue in the room, to communicate to the user how well the room is maintainig their desired temperature 
 
 import matplotlib.pyplot as plt
@@ -54,8 +54,6 @@ def setup_graph():
 
  
 def main(): 
-    print ("hi")
-
 
     ## ----- INTIALIZE VARIABLES ------### 
     button_press_count = 0 
@@ -68,8 +66,7 @@ def main():
     fig, ax, line = setup_graph()
     time_data, temperature_data = [], []
     
-    # input("What is your preferred temperature")
-    preferred_temperature = 23
+    preferred_temperature = int(input("What is your preferred temperature"))
     
     while(True):
 
@@ -77,12 +74,21 @@ def main():
         led_control(button_press_count, pi_status)
         update_average(sensor, pi_status)
 
-        update_graph(time_data, temperature_data, line, ax, pi_status)
+        try:
+            update_graph(time_data, temperature_data, line, ax, pi_status)
+        except:
+            print("graph is closed, restart program")
+
+        if text_button() == True:
+            print("Program is Stopped")
+            preferred_temperature = int(input("What is your preferred temperature"))
+            print("To change again, hold down space bar")
+        
         
         if button_press_count == 1:
             close_window(pi_status)
             print("window is closed")
-           
+        
         elif button_press_count == 2: 
             force_open_window(pi_status)
             print("window is open")

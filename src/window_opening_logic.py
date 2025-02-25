@@ -1,22 +1,21 @@
 from sensor_library import * 
-from Logic.weatherapi import get_weather
-from Logic.object_pi import * 
-import time
-
-#time will be determined and changed later, for now it is for rolling average 
+from src.weatherapi import get_weather
+from src.object_pi import *
+from gpiozero import Motor, Buzzer 
+motor = Motor(forward=16, backward=20) 
+buzzer = Buzzer(22)
+import time  
 
 def update_average(sensor,pi_status):
-   ## i should be replaced with sensor.avg_temp.
    pi.set_raw_temperature(pi_status, sensor.avg_temp())
    print_status(pi_status)
-   time.sleep(1)
    return None
 
 def print_status(pi_status):
    green_led = return_string(pi.get_green_led(pi_status))
    yellow_led = return_string(pi.get_yellow_led(pi_status))
    red_led = return_string(pi.get_red_led(pi_status))
-   Motor_status = return_string(None)
+   Motor_status = return_string(pi.get_motor_status(pi_status))
    temperature_raw = pi.get_raw_temperature(pi_status)
    temperature_avg = pi.get_avg_temperature(pi_status)
    Window_state = pi.get_window_status(pi_status)
@@ -79,58 +78,105 @@ def window_conditon(preferred_temperature, pi_status):
             return False
          
    else: 
-      close_window()
+      close_window(pi_status)
    
 def open_window(window_setting, pi_status):
    if window_setting == 1 and pi.get_window_status(pi_status) == 0: 
       print("opening window from closed to half way ")
-      close_to_half()
+      close_to_half(pi_status)
       pi.set_window_status(pi_status,window_setting)
    elif window_setting == 1 and pi.get_window_status(pi_status) == 1: 
       print("do nothing")
       pi.set_window_status(pi_status,window_setting)
    elif window_setting == 1 and pi.get_window_status(pi_status) == 2: 
       print("closing window from open to half way")
-      open_to_half()
+      open_to_half(pi_status)
       pi.set_window_status(pi_status,window_setting)
    elif window_setting == 0 and pi.get_window_status(pi_status) == 0: 
       print("opening window from closed to full")
-      close_to_open()
+      close_to_open(pi_status)
       pi.set_window_status(pi_status, 2)
    elif window_setting == 0 and pi.get_window_status(pi_status) == 1: 
       print("opening window from half way to full")
-      half_to_open()
+      half_to_open(pi_status)
       pi.set_window_status(pi_status, 0)
    elif window_setting == 0 and pi.get_window_status(pi_status) == 2: 
       print("do nothing")
       pi.set_window_status(pi_status, 2)
 
-def close_to_open():
+def close_to_open(pi_status):
    print("close_to_open")
+   pi.set_motor_status(pi_status,True)
+   print_status(pi_status)
+   motor.forward()
+   buzzer.on()
+   time.sleep(10)
+   buzzer.off()
+   motor.stop()
+   pi.set_motor_status(pi_status,False)
 
-def close_to_half():
+def close_to_half(pi_status):
    print("close_to_half")
+   pi.set_motor_status(pi_status,True)
+   print_status(pi_status)
+   motor.forward()
+   buzzer.on()
+   time.sleep(10)
+   motor.stop()
+   buzzer.off()
+   pi.set_motor_status(pi_status,False)
 
-def half_to_close():
+def half_to_close(pi_status):
    print("half_to_close")
+   pi.set_motor_status(pi_status,True)
+   print_status(pi_status)
+   motor.forward()
+   buzzer.on()
+   time.sleep(10)
+   motor.stop()
+   buzzer.off()
+   pi.set_motor_status(pi_status,False)
 
-def half_to_open():
+def half_to_open(pi_status):
    print("half_to_open")
+   pi.set_motor_status(pi_status,True)
+   print_status(pi_status)
+   motor.forward()
+   buzzer.on()
+   time.sleep(10)
+   motor.stop()
+   buzzer.off()
+   pi.set_motor_status(pi_status,False)
 
-def open_to_close():
+def open_to_close(pi_status):
    print("open_to_close")
+   pi.set_motor_status(pi_status,True)
+   print_status(pi_status)
+   motor.forward()
+   buzzer.on()
+   time.sleep(10)
+   motor.stop()
+   buzzer.off()
+   pi.set_motor_status(pi_status,False)
 
-def open_to_half():
+def open_to_half(pi_status):
    print("open_to_half")
-
+   pi.set_motor_status(pi_status,True)
+   print_status(pi_status)
+   motor.forward()
+   buzzer.on()
+   time.sleep(10)
+   motor.stop()
+   buzzer.off()
+   pi.set_motor_status(pi_status,False)
 
 def force_open_window(pi_status):
    if pi.get_window_status(pi_status) == 0:
       print("open from closed to full")
-      close_to_open()
+      close_to_open(pi_status)
    elif pi.get_window_status(pi_status) == 1:
       print("open from half to full")
-      half_to_open()
+      half_to_open(pi_status)
    elif pi.get_window_status(pi_status) == 2:
       print("do nothing")
    pi.set_window_status(pi_status,2)
@@ -140,10 +186,10 @@ def close_window(pi_status):
       print("do nothing")
    elif pi.get_window_status(pi_status) == 1:
       print("close from half way")
-      half_to_close()
+      half_to_close(pi_status)
    elif pi.get_window_status(pi_status) == 2:
       print("close from fully opened")
-      open_to_close()
+      open_to_close(pi_status)
    pi.set_window_status(pi_status,0)
 
 def degrees_of_opening(preferred_temperature, pi_status):

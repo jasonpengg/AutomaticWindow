@@ -40,7 +40,7 @@ class pi:
         return self.raw_temperature
 
     def set_raw_temperature(self, current_temperature):
-        self.raw_temperature.insert(0, current_temperature)  # Inserts at the beginning
+        self.raw_temperature.insert(0, current_temperature)  
         if len(self.raw_temperature) > 30:
             self.raw_temperature.pop()
         self.update_avg_temperature()
