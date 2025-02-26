@@ -1,4 +1,6 @@
+# this class is used to initialize the pi as an object to store all its properties 
 class pi:
+    #constructor method for the object
     def __init__ (self, green_led, red_led, yellow_led, raw_temperature, avg_temperature, motor_status, window_status):
         self.green_led = green_led
         self.red_led = red_led
