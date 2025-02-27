@@ -41,6 +41,7 @@ class pi:
     def get_raw_temperature(self):
         return self.raw_temperature
 
+    # raw temperature is an array that houses 30 items for the rolling average 
     def set_raw_temperature(self, current_temperature):
         self.raw_temperature.insert(0, current_temperature)  
         if len(self.raw_temperature) > 30:

@@ -7,7 +7,7 @@ from src.object_pi import *
 # used to control the linear actuator 
 from gpiozero import Motor 
 import time  
-motor = Motor(forward=16, backward=20) 
+motor = Motor(forward=16, backward=12) 
 
 # this is a function that updates the temperature immediately in real time 
 def update_average(sensor,pi_status):
