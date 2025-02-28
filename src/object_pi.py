@@ -12,16 +12,13 @@ class pi:
 
     def set_green_led(self, green_status):
         self.green_led = green_status
-        return self.green_led
-    
+
     def set_red_led(self, red_status):
         self.red_led = red_status
-        return self.red_led
-    
+ 
     def set_yellow_led(self, yellow_status):
         self.yellow_led = yellow_status
-        return self.yellow_led
-    
+
     def get_green_led(self):
         return self.green_led
     
@@ -33,7 +30,6 @@ class pi:
 
     def update_avg_temperature(self):
         self.avg_temperature = (format(sum(self.raw_temperature)/len(self.raw_temperature), '.2f'))
-        return self.avg_temperature
 
     def get_avg_temperature(self):
         return self.avg_temperature
@@ -46,19 +42,16 @@ class pi:
         self.raw_temperature.insert(0, current_temperature)  
         if len(self.raw_temperature) > 30:
             self.raw_temperature.pop()
-        self.update_avg_temperature()
-        return self.raw_temperature
-    
+        self.update_avg_temperature(self)
+
     def set_motor_status(self, motor_status):
         self.motor_status = motor_status
-        return self.motor_status
     
     def get_motor_status(self):
         return self.motor_status
     
     def set_window_status(self, window_status):
         self.window_status = window_status
-        return self.window_status
     
     def get_window_status(self):
         return self.window_status

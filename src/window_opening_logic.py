@@ -53,51 +53,40 @@ def is_hotter_inside(pi_status):
 
 
 # Main logic of the device, determines if the window show open and by how much 
-def window_conditon(preferred_temperature, pi_status):
+def window_condition(preferred_temperature, pi_status):
   
    inside_temp = float(pi.get_avg_temperature(pi_status))
    preferred_temperature = int(preferred_temperature)
    ## checks if the window should be opened or closed 
    if weather_conditon() == True: 
-      # REMOVE
-      print("weather is nice")
-      
       ## if the room is hotter than outside then the device should only open if the user wants the room to be colder 
+      
       if is_hotter_inside(pi_status) == True: 
-         
-         #REMOVE 
-         print("inside is hotter than outside")
-
+        
          ## if the room is hotter than preferred temperature (within 1C range) the window should open
          if inside_temp > preferred_temperature and abs(inside_temp - preferred_temperature ) > 1:
             open_window(degrees_of_opening(preferred_temperature, pi_status), pi_status) 
 
          ## if the room is colder than preferred temperature (within 1C range ) the window should be closed 
          elif inside_temp < preferred_temperature and abs(inside_temp - preferred_temperature )> 1:
-            close_window(pi_status)
-         else:
-
-            ##do nothing 
-            return None
+            close_window(pi_status) 
       
       ## if the room is colder than outside then the window should only open if user wants the room to be warmer 
       elif is_hotter_inside(pi_status) == False: 
-         print("inside is colder")
+
          ## if the room is colder than preferred temperature then the window should open to make the room hotter 
          if inside_temp < preferred_temperature and abs((inside_temp - preferred_temperature )) > 1:
             open_window(degrees_of_opening(preferred_temperature, pi_status),pi_status) 
+         
          ## if the room is hotter than preferred temperature then window should stay closed to prevent the room from getting colder since outside is colder.
          elif inside_temp > preferred_temperature and abs(inside_temp - preferred_temperature ) > 1:
             close_window(pi_status)
-         else:
-            ## do nothing
-            return None
 
    # if the window can't be opened then it should be closed.    
    else: 
       close_window(pi_status)
-# this section determines how much the window shouold open 
 
+# this section determines how much the window shouold open 
 def degrees_of_opening(preferred_temperature, pi_status):
    ## two settings 
    ## 0: closed
@@ -118,7 +107,6 @@ def degrees_of_opening(preferred_temperature, pi_status):
 def open_window(window_setting, pi_status):
    # window needs to be opened half way, and current status is closed 
    if window_setting == 1 and pi.get_window_status(pi_status) == 0: 
-      print("opening window from closed to half way ")
       close_to_half(pi_status)
       pi.set_window_status(pi_status,window_setting)
    # window needs to halfway but is already there 
@@ -127,61 +115,49 @@ def open_window(window_setting, pi_status):
       pi.set_window_status(pi_status,window_setting)
    # window needs to close to half from the open position 
    elif window_setting == 1 and pi.get_window_status(pi_status) == 2: 
-      print("closing window from open to half way")
       open_to_half(pi_status)
       pi.set_window_status(pi_status,window_setting)
    # window needs to open from closed position to full. 
    # they are both 0 because the 0 from window_setting only returns a value if degrees_of_opening runs and that only runs if the window needs to be opened 
    elif window_setting == 0 and pi.get_window_status(pi_status) == 0: 
-      print("opening window from closed to full")
       close_to_open(pi_status)
       pi.set_window_status(pi_status, 2)
    # window needs to open to full from half 
    elif window_setting == 0 and pi.get_window_status(pi_status) == 1: 
-      print("opening window from half way to full")
       half_to_open(pi_status)
       pi.set_window_status(pi_status, 0)
    # window needs to open to full but is already there 
    elif window_setting == 0 and pi.get_window_status(pi_status) == 2: 
-      print("do nothing")
       pi.set_window_status(pi_status, 2)
 
 # opens the window depending on previous positon 
 def force_open_window(pi_status):
    if pi.get_window_status(pi_status) == 0:
-      print("open from closed to full")
       close_to_open(pi_status)
    elif pi.get_window_status(pi_status) == 1:
-      print("open from half to full")
       half_to_open(pi_status)
-   elif pi.get_window_status(pi_status) == 2:
-      print("do nothing")
    pi.set_window_status(pi_status,2)
 
 #closed window based on previous position 
 def close_window(pi_status):
-   if pi.get_window_status(pi_status) == 0:
-      print("do nothing")
-   elif pi.get_window_status(pi_status) == 1:
-      print("close from half way")
+   if pi.get_window_status(pi_status) == 1:
       half_to_close(pi_status)
    elif pi.get_window_status(pi_status) == 2:
-      print("close from fully opened")
       open_to_close(pi_status)
    pi.set_window_status(pi_status,0)
 
 #------------------------------------------------------- THESE ARE THE PHYSICAL OPERATIONS TO MANIPULATE THE LINEAR ACTUATOR --------------------------------#
+# from closed position, open window to full 
 def close_to_open(pi_status):
-   print("close_to_open")
    pi.set_motor_status(pi_status,True)
    print_status(pi_status)
    motor.forward()
-   time.sleep(10)
+   time.sleep(20)
    motor.stop()
    pi.set_motor_status(pi_status,False)
 
+#from closed position, open to half
 def close_to_half(pi_status):
-   print("close_to_half")
    pi.set_motor_status(pi_status,True)
    print_status(pi_status)
    motor.forward()
@@ -189,17 +165,17 @@ def close_to_half(pi_status):
    motor.stop()
    pi.set_motor_status(pi_status,False)
 
+#from half opened position, close fully 
 def half_to_close(pi_status):
-   print("half_to_close")
    pi.set_motor_status(pi_status,True)
    print_status(pi_status)
-   motor.forward()
+   motor.backward()
    time.sleep(10)
    motor.stop()
    pi.set_motor_status(pi_status,False)
 
+#from half opened position, to fully open 
 def half_to_open(pi_status):
-   print("half_to_open")
    pi.set_motor_status(pi_status,True)
    print_status(pi_status)
    motor.forward()
@@ -207,24 +183,26 @@ def half_to_open(pi_status):
    motor.stop()
    pi.set_motor_status(pi_status,False)
 
+#from open position, to fully closed 
 def open_to_close(pi_status):
-   print("open_to_close")
    pi.set_motor_status(pi_status,True)
    print_status(pi_status)
-   motor.forward()
-   time.sleep(10)
+   motor.backward()
+   time.sleep(20)
    motor.stop()
    pi.set_motor_status(pi_status,False)
 
+#from open posiiton, to half opened
 def open_to_half(pi_status):
-   print("open_to_half")
    pi.set_motor_status(pi_status,True)
    print_status(pi_status)
-   motor.forward()
+   motor.backward()
    time.sleep(10)
    motor.stop()
    pi.set_motor_status(pi_status,False)
 
+def initialize_motor(): 
+   motor.backward()
    
 
 

@@ -3,14 +3,11 @@ from src import *
 
 import matplotlib.pyplot as plt
 
-#intializes time 
-
 # gets the data, used for x axis  
 def recent_data(pi_status, start_time):
     return round(time.time() - start_time), float(pi.get_avg_temperature(pi_status))
 
-
-# create the update function
+# Graph will update in live time, 
 def update_graph(time_data, temperature_data, line, ax, pi_status, start_time):
     new_x, new_y = recent_data(pi_status, start_time)
     time_data.append(new_x)
@@ -40,6 +37,7 @@ def update_graph(time_data, temperature_data, line, ax, pi_status, start_time):
     #allows GUI to update
     plt.pause(1)  
 
+# method to initialize graph 
 def setup_graph():
     fig, ax = plt.subplots()
     ax.set_title("Room Temperature Over Time")
@@ -55,11 +53,13 @@ def setup_graph():
  
 def main(): 
 
-    ## ----- INTIALIZE VARIABLES ------### 
+    ## ----- INTIALIZE VARIABLES ------##
     button_press_count = 0 
     pi_status = pi(False, False, False, None, None, False, 0)
     sensor = Temperature_Sensor()
     start_time = time.time()
+    intialize_LED()
+    initialize_motor()
 
     # Set up the figure and axes 
     fig, ax, line = setup_graph()
@@ -68,7 +68,7 @@ def main():
     # asks user for preferred temperature 
     preferred_temperature = int(input("What is your preferred temperature"))
     print("To change your temperature press the button")
-    
+
     while(True):
 
         # checks for button press
@@ -88,19 +88,16 @@ def main():
             preferred_temperature = int(input("What is your preferred temperature"))
             print("To change again, press the button")
         
-        
         if button_press_count == 1:
             close_window(pi_status)
-            print("window is closed")
         
         elif button_press_count == 2: 
             force_open_window(pi_status)
-            print("window is open")
         
         elif button_press_count == 3:
             # every 5 seconds, it checks if the window should be manipulated 
             if (round(time.perf_counter()) % 5) == 0:
                 print(time.perf_counter())
-                window_conditon(preferred_temperature, pi_status)
+                window_condition(preferred_temperature, pi_status)
         time.sleep(1)
 main()

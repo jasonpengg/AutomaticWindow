@@ -13,7 +13,6 @@ text_button = Button(14)
 # updates the button press count and loops back to 1 after 3 presses 
 def button_counter(button_press_count):
     if button.is_pressed:
-        print("button Pressed")
         button_press_count += 1  
         if button_press_count > 3:  
             button_press_count = 1
@@ -50,3 +49,8 @@ def led_control(button_press_count, pi_status):
 def text_input():
     if text_button.is_pressed:
         return True
+    
+def intialize_LED():
+    red_led.off()
+    green_led.off()
+    yellow_led.off()
