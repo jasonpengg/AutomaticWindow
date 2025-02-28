@@ -56,16 +56,12 @@ def main():
     fig, ax, line = setup_graph()
     time_data, temperature_data = [], []
     
-    # asks user for preferred temperature 
     preferred_temperature = int(input("What is your preferred temperature"))
     print("To change your temperature press the button")
 
     while(True):
-        # checks for button press
         button_press_count = button_counter(button_press_count)
-        led_control(button_press_count, pi_status)
-        
-        #updates and prints the rolling average 
+        led_control(button_press_count, pi_status) 
         update_average(sensor, pi_status)
 
         try:
