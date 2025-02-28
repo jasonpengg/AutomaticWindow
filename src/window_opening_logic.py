@@ -1,11 +1,8 @@
 # imports from different files in the folder. 
 from sensor_library import * 
-# used to access the API key to get realtime updates of weather 
-from src.weatherapi import get_weather
-# used to create a pi object to keep track of all processes 
 from src.object_pi import *
-# used to control the linear actuator 
 from gpiozero import Motor 
+import requests
 import time  
 motor = Motor(forward=16, backward=12) 
 
@@ -23,17 +20,42 @@ def print_status(pi_status):
    Motor_status = return_string(pi.get_motor_status(pi_status))
    temperature_raw = pi.get_raw_temperature(pi_status)
    temperature_avg = pi.get_avg_temperature(pi_status)
-   Window_state = pi.get_window_status(pi_status)
+   Window_state = return_window_string(pi.get_window_status(pi_status))
    print(f'{"Temperature Raw":<15} {"Temperature Avg":<15} {"Green Led":<10} {"Yellow Led":<10} {"Red Led":<8} {"Motor Status":<12} {"Window Status":<15}')
    print(f'{temperature_raw[0]:<15} {temperature_avg:<15} {green_led:<10} {yellow_led:<10} {red_led:<8} {Motor_status:<12} {Window_state:<12}')
 
-# this function turns the boolean True/False into string values 
 def return_string(input):
    if input == True:
       return "ON"
    else:
       return "OFF"
 
+def return_window_string(input):
+   if input == 0:
+      return "Closed"
+   elif input == 1:
+      return "Half"
+   else:
+      return "Open"
+
+#function is to get information from WeatherStack API 
+def get_weather():
+    # api_key = '25c8075700176ffa23836cc6b6820d56'
+    try:
+        r = requests.get('http://api.weatherstack.com/current?access_key=25c8075700176ffa23836cc6b6820d56&query=Hamilton')
+        data = r.json()
+        temperature = data['current']['temperature']
+        weather_description = data['current']['weather_descriptions'][0]
+    
+    except:
+        temperature = 22
+        weather_description = 'sunny'
+        ## API key only allows 100 uses which quickly get used up within a matter of 100 seconds 
+        ## Source: WeatherStackAPI and fetch another key if needed 
+        ## As well, these are the possible outputs of weather_description:
+        ## "clear sky", "few clouds", "scattered clouds", "broken clouds", "overcast clouds", "shower rain", "rain", "heavy rain", "light rain", "snow", "heavy snow", "sleet", "hail", "thunderstorm", "mist", "fog", "haze", and "dust"
+
+    return temperature ,weather_description
 # ----------------------------------------------- THIS IS WHERE THE WINDOW LOGIC BEGINS --------------------------------------------------------#
 
 # this function determines if the weather outside is appropriate to open the window 
@@ -51,7 +73,6 @@ def is_hotter_inside(pi_status):
    else: 
       return False
 
-
 # Main logic of the device, determines if the window show open and by how much 
 def window_condition(preferred_temperature, pi_status):
   
@@ -59,8 +80,8 @@ def window_condition(preferred_temperature, pi_status):
    preferred_temperature = int(preferred_temperature)
    ## checks if the window should be opened or closed 
    if weather_conditon() == True: 
-      ## if the room is hotter than outside then the device should only open if the user wants the room to be colder 
       
+      ## if the room is hotter than outside then the device should only open if the user wants the room to be colder 
       if is_hotter_inside(pi_status) == True: 
         
          ## if the room is hotter than preferred temperature (within 1C range) the window should open
@@ -81,8 +102,7 @@ def window_condition(preferred_temperature, pi_status):
          ## if the room is hotter than preferred temperature then window should stay closed to prevent the room from getting colder since outside is colder.
          elif inside_temp > preferred_temperature and abs(inside_temp - preferred_temperature ) > 1:
             close_window(pi_status)
-
-   # if the window can't be opened then it should be closed.    
+  
    else: 
       close_window(pi_status)
 
@@ -100,33 +120,24 @@ def degrees_of_opening(preferred_temperature, pi_status):
    else: 
       return 1
 
-
-#-------------------------------------------------- THIS SECTION MANIPULATES THE LINEAR ACTUATOR --------------------------------------------# 
+#-------------------------------------------------- THIS SECTION MANIPULATES THE LINEAR ACTUATOR TO DETERMINE POSITION --------------------------------------------# 
 
 # determines how the linear actuator should move depending on previous function 
 def open_window(window_setting, pi_status):
-   # window needs to be opened half way, and current status is closed 
    if window_setting == 1 and pi.get_window_status(pi_status) == 0: 
       close_to_half(pi_status)
       pi.set_window_status(pi_status,window_setting)
-   # window needs to halfway but is already there 
-   elif window_setting == 1 and pi.get_window_status(pi_status) == 1: 
-      #do nothing 
+   elif window_setting == 1 and pi.get_window_status(pi_status) == 1:  
       pi.set_window_status(pi_status,window_setting)
-   # window needs to close to half from the open position 
    elif window_setting == 1 and pi.get_window_status(pi_status) == 2: 
       open_to_half(pi_status)
       pi.set_window_status(pi_status,window_setting)
-   # window needs to open from closed position to full. 
-   # they are both 0 because the 0 from window_setting only returns a value if degrees_of_opening runs and that only runs if the window needs to be opened 
    elif window_setting == 0 and pi.get_window_status(pi_status) == 0: 
       close_to_open(pi_status)
       pi.set_window_status(pi_status, 2)
-   # window needs to open to full from half 
    elif window_setting == 0 and pi.get_window_status(pi_status) == 1: 
       half_to_open(pi_status)
       pi.set_window_status(pi_status, 0)
-   # window needs to open to full but is already there 
    elif window_setting == 0 and pi.get_window_status(pi_status) == 2: 
       pi.set_window_status(pi_status, 2)
 
@@ -146,7 +157,7 @@ def close_window(pi_status):
       open_to_close(pi_status)
    pi.set_window_status(pi_status,0)
 
-#------------------------------------------------------- THESE ARE THE PHYSICAL OPERATIONS TO MANIPULATE THE LINEAR ACTUATOR --------------------------------#
+#------------------------------------------------------- THESE FUNCTIONS CAUSE THE LINEAR ACUTATOR TO MOVE --------------------------------#
 # from closed position, open window to full 
 def close_to_open(pi_status):
    pi.set_motor_status(pi_status,True)
@@ -203,7 +214,3 @@ def open_to_half(pi_status):
 
 def initialize_motor(): 
    motor.backward()
-   
-
-
-    
