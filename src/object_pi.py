@@ -42,7 +42,7 @@ class pi:
         self.raw_temperature.insert(0, current_temperature)  
         if len(self.raw_temperature) > 30:
             self.raw_temperature.pop()
-        self.update_avg_temperature(self)
+        self.update_avg_temperature()
 
     def set_motor_status(self, motor_status):
         self.motor_status = motor_status
